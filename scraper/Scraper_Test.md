@@ -60,4 +60,11 @@ from selenium import webdriver
 driver = webdriver.Chrome()
 url = 'https://gab.com'
 driver.get(url)
+feed = driver.find_element_by_xpath("//div[@role = 'feed']")
 ```
+
+```python
+posts = feed.find_elements_by_xpath(".//*")
+```
+
+A quick inspection shows that it's a bit hard to find any sort of uniform identifier, plenty of elements are packed embedded deeply within other elements. It makes this whole thing pretty difficult and equally as likely to be broken by changes to the website's structure. So I'll shelve this for now and just use the API directly.
