@@ -60,6 +60,10 @@ account_created_at = account_info['created_at']
 account_note = account_info['note']
 ```
 
+```python
+account_created_at
+```
+
 ### Post Utility Functions 
 
 Useful functions pertaining to pulling and processing posts.
