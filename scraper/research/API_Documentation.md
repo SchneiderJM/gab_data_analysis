@@ -61,7 +61,7 @@ account_note = account_info['note']
 ```
 
 ```python
-account_created_at
+post
 ```
 
 ### Post Utility Functions 
@@ -178,29 +178,90 @@ posts[2]['replies_count']
 
 ```python
 comments = []
-for i in range(20):
-    url = 'https://gab.com/api/v1/comments/{}?max_id={}'.format(posts[2]['id'],i)
+for i in range(1,16):
+    url = 'https://gab.com/api/v1/comments/{}?max_id={}'.format(posts[1]['id'],i)
     response = requests.get(url, headers=headers)
-    comments.append(json.loads(response.content.decode('utf-8')))
+    comments.extend(json.loads(response.content.decode('utf-8')))
     
 
 ```
 
 ```python
-comment = comments[0][0]
-comment
+len(set(list(map(lambda x: x['id'], comments))))
 ```
 
+Based on some experimentation here, it seems like the way to get all of the replies to a given post (or comment) is to gather everything for a given post id up to a max_id (in the URL parameter max_id) of (floor($\frac{replies\_count}{10}$) + 1)
+
+
+## Comment Utility Functions
+
 ```python
-url = 'https://gab.com/api/v1/comments/{}?max_id={}'.format('108061787025501269',10)#?max_id=1&sort_by=most-liked'.format(posts[0]['id'])
-headers = {
+import math
+def get_post_comments(post):
+    '''
+    Description: Gets all comments from a post in a nested structure
+    
+    Input: 
+        post (dict): a single gab post
+        
+    Output:
+        comments (list of dicts): A list of comment objects structured {'comment': comment, 'replies': replies}
+            where comment is the actual comment object returned by the API and replies is a list of
+            comments in reply to this one. This preserves the hierarchical structure of conversations.
+    '''
+    headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0'
-}
-response = requests.get(url, headers=headers)
-#Decoding the response into a Python list
-comments = json.loads(response.content.decode('utf-8'))
-```
-
-```python
-len(comments)
+    }
+    post_id = post['id']
+    post_replies_count = post['direct_replies_count']
+    if post_replies_count == 0:
+        return []
+    max_ids = math.floor(post_replies_count/10) + 1
+    comments = []
+    for max_id in range(max_ids):
+        url = 'https://gab.com/api/v1/comments/{}?max_id={}'.format(post_id,max_id)
+        response = requests.get(url, headers=headers)
+        comments.extend(json.loads(response.content.decode('utf-8')))
+    
+    comment_tree = []
+    for comment in comments:
+        comment_tree.append({'comment':comment, 'replies':get_subcomments(comment)})
+        
+    return comment_tree
+    
+def get_subcomments(comment):
+    '''
+    Description: Gets all subcomments from a comment in a nested structure, really intended only to be called by
+        get_post_comments
+    
+    Input: 
+        comment (dict): a single comment post
+        
+    Output:
+        comment_tree (list of dicts): A list of comment objects structured {'comment': comment, 'replies': replies}
+            where comment is the actual comment object returned by the API and replies is a list of
+            comments in reply to this one. This preserves the hierarchical structure of conversations.
+    '''
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0'
+    }
+    #gab returns a key-value {'error':'Record not found'} if a comment was deleted, this handles that case
+    if 'error' in comment:
+        return []
+    comment_id = comment['id']
+    comment_replies_count = comment['direct_replies_count']
+    if comment_replies_count == 0:
+        return []
+    max_ids = math.floor(comment_replies_count/10) + 1
+    child_comments = []
+    for max_id in range(max_ids):
+        url = 'https://gab.com/api/v1/comments/{}?max_id={}'.format(comment_id,max_id)
+        response = requests.get(url, headers=headers)
+        child_comments.extend(json.loads(response.content.decode('utf-8')))
+    
+    child_tree = []
+    for child_comment in child_comments:
+        child_tree.append({'comment':child_comment, 'replies':get_subcomments(child_comment)})
+        
+    return child_tree
 ```
