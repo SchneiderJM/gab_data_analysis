@@ -1,23 +1,57 @@
-from models.database_models import posts, comments, gab_users
+from models.database_models import Post, Comment, GabUser
+import utils.data_utils as du
 from sqlmodel import create_engine, Session, select
+from sqlalchemy.dialects.mysql import insert
 import sqlalchemy as sa
 import datetime
 
+def execute():
+    connection_url = sa.engine.URL.create(
+        drivername='mysql+pymysql',
+        username='root',
+        password='local_test_password',
+        host='127.0.0.1',
+        port='3306',
+        database='gab_db'
+    )
+    vals = []
+    engine = create_engine(connection_url)
+    with Session(engine) as session:
+        result = session.exec('SELECT * FROM posts')
+        for entry in result:
+            vals.append(entry)
+    return(vals)
+
+def write_users(users):
+    connection_url = sa.engine.URL.create(
+        drivername='mysql+pymysql',
+        username='root',
+        password='local_test_password',
+        host='127.0.0.1',
+        port='3306',
+        database='gab_db'
+    )
+    engine = create_engine(connection_url)
+    with Session(engine) as session:
+        for user in users:
+            account_info = du.get_author_info_from_user(user)
+            insert_user_query = '''INSERT INTO gab_users(gab_id, username, name, display_name,
+                                    is_verified, account_created_at, account_note, num_followers,
+                                    is_bot, is_donor)
+                                    
+                                    VALUES({}, '{}', '{}', '{}', {}, {}, '{}', {}, {}, {})
+                                    
+                                    '''.format(*account_info)
 
 
-def write_posts(posts, batch=False):
-    '''
-    Description: Writes a post (or several) to the database
+            session.exec(user)
+        
+        session.commit()
 
-    Inputs:
-        post (list): list of posts (if sending one post, just send a list with only one entry)
-        batch (boolean): Boolean value, whether multiple posts should be written to the database. 
-            If this is false, only the first post in the list will be written
-    '''
-    assert len(posts) == 0, 'post list is empty, nothing will be written'
-    engine = create_engine('localhost:3306')
-    if (batch == False):
-        post = posts[0]
+
+def get_datetime(string_date):
+    output = datetime.datetime.strptime(string_date[0:-1], '%Y-%m-%dT%H:%M:%S.%f')
+    return output
 
 def __add_test_post__():
     connection_url = sa.engine.URL.create(
@@ -29,7 +63,7 @@ def __add_test_post__():
         database='gab_db'
     )
     engine = create_engine(connection_url)
-    post = posts(gab_id=2, 
+    post = Post(gab_id=2, 
                 content='test post', 
                 created_at=datetime.datetime.now(),
                 revised_at=datetime.datetime.now(),
@@ -52,6 +86,6 @@ def __get_first_post__():
     )
     engine = create_engine(connection_url)
     with Session(engine) as session:
-        statement = select(posts).where(posts.id == 1)
+        statement = select(Post).where(Post.id == 1)
         result = session.exec(statement).all()
         return result

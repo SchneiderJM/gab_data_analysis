@@ -2,9 +2,6 @@ import math
 import requests
 import json
 
-def hello1():
-    return 'hello1'
-
 def get_post_comments(post: dict[str, any]) -> list[dict]:
     '''
     Description: Gets all comments from a post in a nested structure
@@ -96,46 +93,3 @@ def get_posts(n_pages: int, sort_by='hot'):
         posts.extend(json.loads(response.content.decode('utf-8')))
         
     return(posts)
-    
-def unpack_post_data(post: dict[str, any]):
-    '''
-    Description: Unpacks the data from a post returning information that I've (somewhat arbitrarily) deemed relevant
-    
-    Inputs:
-        post (dict): One post returned from the Gab API
-        
-    Outputs:
-        Data relevant to a post
-    '''
-    content = post['content']
-    created_at = post['created_at']
-    revised_at = post['revised_at']
-    reblogs_count = post['reblogs_count']
-    replies_count = post['replies_count']
-    favourites_count = post['favourites_count']
-    
-    return([content, created_at, revised_at, reblogs_count, replies_count, favourites_count])
-	
-def get_author_info_from_post(post: dict[str, any]):
-    '''
-    Description: Gets the author information from a post
-    
-    Inputs:
-        post (dict): One post returned from the Gab API
-        
-    Outputs:
-        Author information
-    '''
-    account_info = post['account']
-    account_id = account_info['id']
-    account_username = account_info['username']
-    account_name = account_info['acct']
-    account_display = account_info['display_name']
-    account_is_verified = account_info['is_verified']
-    account_created_at = account_info['created_at']
-    account_note = account_info['note']
-    account_followers = account_info['followers_count']
-    account_is_bot = account_info['bot']
-    
-    return([account_info, account_id, account_username, account_name, account_display, account_is_verified,
-           account_created_at, account_note, account_followers, account_is_bot])
