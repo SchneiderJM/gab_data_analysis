@@ -1,22 +1,9 @@
 from models.database_models import posts, comments, gab_users
 from sqlmodel import create_engine, Session, select
 import sqlalchemy as sa
+import datetime
 
-def get_first_post():
-    connection_url = sa.engine.URL.create(
-        drivername='mysql+pymysql',
-        username='root',
-        password='local_test_password',
-        host='127.0.0.1',
-        port='3306',
-        database='gab_db'
-    )
-    #engine = create_engine('mysql+mysqlconnector://root:local_test_password@localhost:3306/gab_db')
-    engine = create_engine(connection_url)
-    with Session(engine) as session:
-        statement = select(posts).where(posts.id == 1)
-        result = session.exec(statement).all()
-        return result
+
 
 def write_posts(posts, batch=False):
     '''
@@ -31,3 +18,40 @@ def write_posts(posts, batch=False):
     engine = create_engine('localhost:3306')
     if (batch == False):
         post = posts[0]
+
+def __add_test_post__():
+    connection_url = sa.engine.URL.create(
+        drivername='mysql+pymysql',
+        username='root',
+        password='local_test_password',
+        host='127.0.0.1',
+        port='3306',
+        database='gab_db'
+    )
+    engine = create_engine(connection_url)
+    post = posts(gab_id=2, 
+                content='test post', 
+                created_at=datetime.datetime.now(),
+                revised_at=datetime.datetime.now(),
+                favourites_count=0,
+                reblogs_count=0,
+                replies_count=0,
+                id_gab_users=0)
+    with Session(engine) as session:
+        session.add(post)
+        session.commit()
+
+def __get_first_post__():
+    connection_url = sa.engine.URL.create(
+        drivername='mysql+pymysql',
+        username='root',
+        password='local_test_password',
+        host='127.0.0.1',
+        port='3306',
+        database='gab_db'
+    )
+    engine = create_engine(connection_url)
+    with Session(engine) as session:
+        statement = select(posts).where(posts.id == 1)
+        result = session.exec(statement).all()
+        return result
