@@ -37,14 +37,24 @@ def write_users(users):
             account_info = du.get_author_info_from_user(user)
             insert_user_query = '''INSERT INTO gab_users(gab_id, username, name, display_name,
                                     is_verified, account_created_at, account_note, num_followers,
-                                    is_bot, is_donor)
+                                    created_at, is_bot, is_donor)
                                     
-                                    VALUES({}, '{}', '{}', '{}', {}, {}, '{}', {}, {}, {})
+                                    VALUES({}, '{}', '{}', '{}', {}, '{}', '{}', {}, CURRENT_TIMESTAMP, {}, {})
+
+                                    ON DUPLICATE KEY UPDATE
+
+                                    username = '{}',
+                                    name = '{}',
+                                    display_name = '{}',
+                                    is_verified = {},
+                                    account_created_at = '{}',
+                                    account_note = '{}',
+                                    num_followers = {},
+                                    is_bot = {},
+                                    is_donor = {}
                                     
-                                    '''.format(*account_info)
-
-
-            session.exec(user)
+                                    '''.format(*account_info, *(account_info[1:]))
+            session.exec(insert_user_query)
         
         session.commit()
 

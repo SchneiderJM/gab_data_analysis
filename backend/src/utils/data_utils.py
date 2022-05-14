@@ -1,3 +1,4 @@
+import datetime
 def unpack_post_data(post: dict[str, any]):
     '''
     Description: Unpacks the data from a post returning information that I've (somewhat arbitrarily) deemed relevant
@@ -9,8 +10,8 @@ def unpack_post_data(post: dict[str, any]):
         Data relevant to a post
     '''
     content = post['content']
-    created_at = post['created_at']
-    revised_at = post['revised_at']
+    created_at = datetime.datetime.strptime(post['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+    revised_at = datetime.datetime.strptime(post['revised_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
     reblogs_count = post['reblogs_count']
     replies_count = post['replies_count']
     favourites_count = post['favourites_count']
@@ -33,13 +34,14 @@ def get_author_info_from_post(post: dict[str, any]):
     account_name = account_info['acct']
     account_display = account_info['display_name']
     account_is_verified = account_info['is_verified']
-    account_created_at = account_info['created_at']
+    account_created_at = datetime.datetime.strptime(account_info['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
     account_note = account_info['note']
     account_followers = account_info['followers_count']
     account_is_bot = account_info['bot']
+    account_is_donor = account_info['is_donor']
     
     return([account_info, account_id, account_username, account_name, account_display, account_is_verified,
-           account_created_at, account_note, account_followers, account_is_bot])
+           account_created_at, account_note, account_followers, account_is_bot, account_is_donor])
 
 def get_author_info_from_user(account_info: dict[str, any]):
     '''
@@ -56,7 +58,7 @@ def get_author_info_from_user(account_info: dict[str, any]):
     account_name = account_info['acct']
     account_display = account_info['display_name']
     account_is_verified = account_info['is_verified']
-    account_created_at = account_info['created_at']
+    account_created_at = datetime.datetime.strptime(account_info['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
     account_note = account_info['note']
     account_followers = account_info['followers_count']
     account_is_bot = account_info['bot']

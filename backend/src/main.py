@@ -1,17 +1,13 @@
 from fastapi import FastAPI
 import utils.scraper_utils as su
 import utils.database_utils as dbutils
+import utils.data_utils as datautils
 
 app = FastAPI()
 
-@app.get('/execute')
-async def tester():
-	t = dbutils.execute()
-	return t
-
 @app.get('/write_users')
 async def write_users():
-	users = [{'id': '31',
+	users: list = [{'id': '31',
 		'username': 'a',
 		'acct': 'a',
 		'display_name': 'Andrew Torba ✝️',
@@ -27,7 +23,7 @@ async def write_users():
 		'header': 'https://media.gab.com/system/accounts/headers/000/000/031/original/D2DFEEB6-ECA8-44A4-BE57-419AC9BEBD6C.jpeg',
 		'header_static': 'https://media.gab.com/system/accounts/headers/000/000/031/original/D2DFEEB6-ECA8-44A4-BE57-419AC9BEBD6C.jpeg',
 		'is_spam': False,
-		'followers_count': 3589920,
+		'followers_count': 50,
 		'following_count': 2471,
 		'statuses_count': 63946,
 		'is_pro': True,
@@ -77,7 +73,6 @@ async def write_users():
 		'show_pro_life': False,
 		'emojis': [],
 		'fields': []}]
-
 	dbutils.write_users(users)
 
 @app.get('/fetch_posts')
