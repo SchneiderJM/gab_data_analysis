@@ -9,6 +9,7 @@ def unpack_post_data(post: dict[str, any]):
     Outputs:
         Data relevant to a post
     '''
+    gab_id = post['id']
     content = post['content']
     created_at = datetime.datetime.strptime(post['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
     revised_at = datetime.datetime.strptime(post['revised_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
@@ -16,7 +17,7 @@ def unpack_post_data(post: dict[str, any]):
     replies_count = post['replies_count']
     favourites_count = post['favourites_count']
     
-    return([content, created_at, revised_at, reblogs_count, replies_count, favourites_count])
+    return([gab_id, content, created_at, revised_at, reblogs_count, replies_count, favourites_count])
 	
 def get_author_info_from_post(post: dict[str, any]):
     '''

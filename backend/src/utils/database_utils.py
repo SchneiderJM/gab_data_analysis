@@ -22,6 +22,39 @@ def execute():
             vals.append(entry)
     return(vals)
 
+def write_posts(posts):
+    connection_url = sa.engine.URL.create(
+        drivername='mysql+pymysql',
+        username='root',
+        password='local_test_password',
+        host='127.0.0.1',
+        port='3306',
+        database='gab_db'
+    )
+    engine = create_engine(connection_url)
+    with Session(engine) as session:
+        for post in posts:
+            post_info = du.unpack_post_data(post)
+            #TODO Find the structure to grab the User ID
+            user_gab_id = post['']
+            insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
+                                    reblogs_count, replies_count, favourites_count, id_gab_users)
+                                    VALUES({}, '{}',  '{}', '{}', {}, {}, {}, 
+                                    (SELECT id FROM gab_users WHERE gab_id = {}))
+
+                                    ON DUPLICATE KEY UPDATE
+
+                                    content = '{}',
+                                    created_at = '{}',
+                                    revised_at = '{}',
+                                    reblogs_count = {},
+                                    replies_count = {},
+                                    favourites_count = {}
+                                '''.format(*post_info, user_gab_id, *post_info)
+            session.exec(insert_post_query)
+
+        session.commit()
+
 def write_users(users):
     connection_url = sa.engine.URL.create(
         drivername='mysql+pymysql',
@@ -60,7 +93,7 @@ def write_users(users):
 
 
 def get_datetime(string_date):
-    output = datetime.datetime.strptime(string_date[0:-1], '%Y-%m-%dT%H:%M:%S.%f')
+    output = datetime.datetime.strptime(string_date, '%Y-%m-%dT%H:%M:%S.%fZ')
     return output
 
 def __add_test_post__():
