@@ -35,8 +35,7 @@ def write_posts(posts):
     with Session(engine) as session:
         for post in posts:
             post_info = du.unpack_post_data(post)
-            #TODO Find the structure to grab the User ID
-            user_gab_id = post['']
+            user_gab_id = post['account']['id']
             insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
                                     reblogs_count, replies_count, favourites_count, id_gab_users)
                                     VALUES({}, '{}',  '{}', '{}', {}, {}, {}, 
