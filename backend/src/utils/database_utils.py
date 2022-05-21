@@ -5,24 +5,7 @@ from sqlalchemy.dialects.mysql import insert
 import sqlalchemy as sa
 import datetime
 
-def __execute__ ():
-    connection_url = sa.engine.URL.create(
-        drivername='mysql+pymysql',
-        username='root',
-        password='local_test_password',
-        host='127.0.0.1',
-        port='3306',
-        database='gab_db'
-    )
-    vals = []
-    engine = create_engine(connection_url)
-    with Session(engine) as session:
-        result = session.exec('SELECT * FROM posts')
-        for entry in result:
-            vals.append(entry)
-    return(vals)
-
-def write_posts(posts):
+def write_posts(posts: list):
     connection_url = sa.engine.URL.create(
         drivername='mysql+pymysql',
         username='root',
@@ -36,10 +19,27 @@ def write_posts(posts):
         for post in posts:
             post_info = du.unpack_post_data(post)
             user_gab_id = post['account']['id']
-            insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
-                                    reblogs_count, replies_count, favourites_count, id_gab_users, reactions_counts)
-                                    VALUES({}, '{}',  '{}', '{}', {}, {}, {}, 
-                                    (SELECT id FROM gab_users WHERE gab_id = {}), '{}')
+            if post_info[3] == 'null':
+                insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
+                                    reblogs_count, replies_count, favourites_count, reactions_counts, id_gab_users)
+                                    VALUES({}, '{}',  '{}', {}, {}, {}, {}, '{}',
+                                    (SELECT id FROM gab_users WHERE gab_id = {}))
+
+                                    ON DUPLICATE KEY UPDATE
+
+                                    content = '{}',
+                                    created_at = '{}',
+                                    revised_at = {},
+                                    reblogs_count = {},
+                                    replies_count = {},
+                                    favourites_count = {},
+                                    reactions_counts = '{}'
+                                '''.format(*post_info, user_gab_id, *post_info[1:])
+            else:
+                insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
+                                    reblogs_count, replies_count, favourites_count, reactions_counts, id_gab_users)
+                                    VALUES({}, '{}',  '{}', '{}', {}, {}, {}, '{}',
+                                    (SELECT id FROM gab_users WHERE gab_id = {}))
 
                                     ON DUPLICATE KEY UPDATE
 
@@ -50,12 +50,12 @@ def write_posts(posts):
                                     replies_count = {},
                                     favourites_count = {},
                                     reactions_counts = '{}'
-                                '''.format(*post_info, user_gab_id, *post_info)
+                                '''.format(*post_info, user_gab_id, *post_info[1:])
             session.exec(insert_post_query)
 
         session.commit()
 
-def write_users(users):
+def write_users(users: list):
     connection_url = sa.engine.URL.create(
         drivername='mysql+pymysql',
         username='root',
@@ -92,7 +92,7 @@ def write_users(users):
         session.commit()
 
 
-def get_datetime(string_date):
+def get_datetime(string_date: str):
     output = datetime.datetime.strptime(string_date, '%Y-%m-%dT%H:%M:%S.%fZ')
     return output
 
@@ -132,3 +132,20 @@ def __get_first_post__():
         statement = select(Post).where(Post.id == 1)
         result = session.exec(statement).all()
         return result
+
+def __execute__ ():
+    connection_url = sa.engine.URL.create(
+        drivername='mysql+pymysql',
+        username='root',
+        password='local_test_password',
+        host='127.0.0.1',
+        port='3306',
+        database='gab_db'
+    )
+    vals = []
+    engine = create_engine(connection_url)
+    with Session(engine) as session:
+        result = session.exec('SELECT * FROM posts')
+        for entry in result:
+            vals.append(entry)
+    return(vals)

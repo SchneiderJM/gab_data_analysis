@@ -7,8 +7,14 @@ app = FastAPI()
 
 @app.get('/archive_latest_posts')
 async def archive_latest_posts():
-	posts = su.get_posts(10)
-	return(posts)
+	posts = su.get_posts(1)
+	#Grabbing the first five posts just for test purposes
+	posts = posts[0:5]
+	users = list(map(lambda x: x['account'], posts))
+
+	dbutils.write_users(users)
+	dbutils.write_posts(posts)
+	return(users)
 
 @app.get('/write_users')
 async def write_users():

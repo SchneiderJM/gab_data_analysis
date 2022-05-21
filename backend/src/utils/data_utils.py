@@ -10,13 +10,17 @@ def unpack_post_data(post: dict[str, any]):
         Data relevant to a post
     '''
     gab_id = post['id']
-    content = post['content']
+    #Turning apostrophes into an escaped version for SQL
+    content: str = post['content'].replace("'", "''")
     created_at = datetime.datetime.strptime(post['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
-    revised_at = datetime.datetime.strptime(post['revised_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+    if post['revised_at'] != None:
+        revised_at = datetime.datetime.strptime(post['revised_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        revised_at = 'null'
     reblogs_count = post['reblogs_count']
     replies_count = post['replies_count']
     favourites_count = post['favourites_count']
-    reactions_counts = post['reactions_counts']
+    reactions_counts = str(post['reactions_counts']).replace('\'','"')
     
     return([gab_id, content, created_at, revised_at, reblogs_count, replies_count, favourites_count, reactions_counts])
 	
