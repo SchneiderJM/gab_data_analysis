@@ -5,7 +5,7 @@ from sqlalchemy.dialects.mysql import insert
 import sqlalchemy as sa
 import datetime
 
-def execute():
+def __execute__ ():
     connection_url = sa.engine.URL.create(
         drivername='mysql+pymysql',
         username='root',
@@ -37,9 +37,9 @@ def write_posts(posts):
             post_info = du.unpack_post_data(post)
             user_gab_id = post['account']['id']
             insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
-                                    reblogs_count, replies_count, favourites_count, id_gab_users)
+                                    reblogs_count, replies_count, favourites_count, id_gab_users, reactions_counts)
                                     VALUES({}, '{}',  '{}', '{}', {}, {}, {}, 
-                                    (SELECT id FROM gab_users WHERE gab_id = {}))
+                                    (SELECT id FROM gab_users WHERE gab_id = {}), '{}')
 
                                     ON DUPLICATE KEY UPDATE
 
@@ -48,7 +48,8 @@ def write_posts(posts):
                                     revised_at = '{}',
                                     reblogs_count = {},
                                     replies_count = {},
-                                    favourites_count = {}
+                                    favourites_count = {},
+                                    reactions_counts = '{}'
                                 '''.format(*post_info, user_gab_id, *post_info)
             session.exec(insert_post_query)
 

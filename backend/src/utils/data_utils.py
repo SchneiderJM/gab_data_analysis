@@ -16,8 +16,9 @@ def unpack_post_data(post: dict[str, any]):
     reblogs_count = post['reblogs_count']
     replies_count = post['replies_count']
     favourites_count = post['favourites_count']
+    reactions_counts = post['reactions_counts']
     
-    return([gab_id, content, created_at, revised_at, reblogs_count, replies_count, favourites_count])
+    return([gab_id, content, created_at, revised_at, reblogs_count, replies_count, favourites_count, reactions_counts])
 	
 def get_author_info_from_post(post: dict[str, any]):
     '''

@@ -5,6 +5,11 @@ import utils.data_utils as datautils
 
 app = FastAPI()
 
+@app.get('/archive_latest_posts')
+async def archive_latest_posts():
+	posts = su.get_posts(10)
+	return(posts)
+
 @app.get('/write_users')
 async def write_users():
 	users: list = [{'id': '31',
@@ -77,8 +82,8 @@ async def write_users():
 
 @app.get('/fetch_posts')
 async def fetch_posts():
-	info = su.get_posts(1)
-	return info
+	posts: list = su.get_posts(1)
+	return posts
 
 @app.get('/test_add')
 async def __add_test_post__():
