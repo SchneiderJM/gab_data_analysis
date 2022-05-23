@@ -9,12 +9,15 @@ app = FastAPI()
 async def archive_latest_posts():
 	posts = su.get_posts(1)
 	#Grabbing the first five posts just for test purposes
-	posts = posts[0:5]
+	posts = posts[0:1]
 	users = list(map(lambda x: x['account'], posts))
-
+	comment_trees = []
+	for post in posts:
+		comment_tree = su.get_post_comments(post)
+		comment_trees.append(comment_tree)
 	dbutils.write_users(users)
 	dbutils.write_posts(posts)
-	return(users)
+	return(comment_trees)
 
 @app.get('/write_users')
 async def write_users():
