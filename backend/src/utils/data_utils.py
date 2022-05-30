@@ -1,4 +1,30 @@
 import datetime
+
+def unpack_comment_data(comment: dict[str, any]):
+    '''
+    Description: Unpacks the data from a comment returning information that I've (somewhat arbitrarily) deemed relevant
+    
+    Inputs:
+        comment (dict): One post returned from the Gab API
+        
+    Outputs:
+        Data relevant to a comment
+    '''
+    gab_id = comment['id']
+    #Turning apostrophes into an escaped version for SQL
+    content: str = comment['content'].replace("'", "''")
+    in_reply_to_id = comment['in_reply_to_id']
+    created_at = datetime.datetime.strptime(comment['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+    if comment['revised_at'] != None:
+        revised_at = datetime.datetime.strptime(comment['revised_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        revised_at = 'null'
+    reblogs_count = comment['reblogs_count']
+    replies_count = comment['replies_count']
+    favourites_count = comment['favourites_count']
+    
+    return([gab_id, in_reply_to_id, content, created_at, revised_at, reblogs_count, replies_count, favourites_count])
+
 def unpack_post_data(post: dict[str, any]):
     '''
     Description: Unpacks the data from a post returning information that I've (somewhat arbitrarily) deemed relevant

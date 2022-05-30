@@ -5,6 +5,54 @@ from sqlalchemy.dialects.mysql import insert
 import sqlalchemy as sa
 import datetime
 
+def write_comments(comments: list):
+    connection_url = sa.engine.URL.create(
+        drivername='mysql+pymysql',
+        username='root',
+        password='local_test_password',
+        host='127.0.0.1',
+        port='3306',
+        database='gab_db'
+    )
+    engine = create_engine(connection_url)
+    with Session(engine) as session:
+        for comment in comments:
+            comment_info = du.unpack_post_data(comment)
+            user_gab_id = comment['account']['id']
+            if comment_info[4] == 'null':
+                insert_comment_query = '''INSERT INTO comments(gab_id, in_reply_to_id, content, created_at, revised_at, 
+                                    reblogs_count, replies_count, favourites_count, id_gab_users)
+                                    VALUES({}, {}, '{}', '{}', {}, {}, {}, {}, '{}',
+                                    (SELECT id FROM gab_users WHERE gab_id = {}))
+
+                                    ON DUPLICATE KEY UPDATE
+
+                                    content = '{}',
+                                    created_at = '{}',
+                                    revised_at = {},
+                                    reblogs_count = {},
+                                    replies_count = {},
+                                    favourites_count = {}
+                                '''.format(*comment_info, user_gab_id, *comment_info[2:])
+            else:
+                insert_comment_query = '''INSERT INTO comments(gab_id, in_reply_to_id, content, created_at, revised_at, 
+                                    reblogs_count, replies_count, favourites_count, id_gab_users)
+                                    VALUES({}, {}, '{}', '{}', '{}', {}, {}, {},
+                                    (SELECT id FROM gab_users WHERE gab_id = {}))
+
+                                    ON DUPLICATE KEY UPDATE
+
+                                    content = '{}',
+                                    created_at = '{}',
+                                    revised_at = '{}',
+                                    reblogs_count = {},
+                                    replies_count = {},
+                                    favourites_count = {}
+                                '''.format(*comment_info, user_gab_id, *comment_info[1:])
+            session.exec(insert_comment_query)
+
+        session.commit()
+
 def write_posts(posts: list):
     connection_url = sa.engine.URL.create(
         drivername='mysql+pymysql',
@@ -22,7 +70,7 @@ def write_posts(posts: list):
             if post_info[3] == 'null':
                 insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
                                     reblogs_count, replies_count, favourites_count, reactions_counts, id_gab_users)
-                                    VALUES({}, '{}',  '{}', {}, {}, {}, {}, '{}',
+                                    VALUES({}, '{}', '{}', {}, {}, {}, {}, '{}',
                                     (SELECT id FROM gab_users WHERE gab_id = {}))
 
                                     ON DUPLICATE KEY UPDATE
@@ -38,7 +86,7 @@ def write_posts(posts: list):
             else:
                 insert_post_query = '''INSERT INTO posts(gab_id, content, created_at, revised_at, 
                                     reblogs_count, replies_count, favourites_count, reactions_counts, id_gab_users)
-                                    VALUES({}, '{}',  '{}', '{}', {}, {}, {}, '{}',
+                                    VALUES({}, '{}', '{}', '{}', {}, {}, {}, '{}',
                                     (SELECT id FROM gab_users WHERE gab_id = {}))
 
                                     ON DUPLICATE KEY UPDATE

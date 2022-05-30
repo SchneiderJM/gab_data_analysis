@@ -11,13 +11,14 @@ async def archive_latest_posts():
 	#Grabbing the first five posts just for test purposes
 	posts = posts[0:1]
 	users = list(map(lambda x: x['account'], posts))
-	comment_trees = []
+	#dbutils.write_users(users)
+	#dbutils.write_posts(posts)
+	#Collecting and writing comments for each post individually since they're quite large
+	#and take a long time to gather/write
 	for post in posts:
 		comment_tree = su.get_post_comments(post)
-		comment_trees.append(comment_tree)
-	dbutils.write_users(users)
-	dbutils.write_posts(posts)
-	return(comment_trees)
+		comment_users = 
+	return(comment_tree)
 
 @app.get('/write_users')
 async def write_users():
