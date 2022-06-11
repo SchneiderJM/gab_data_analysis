@@ -17,7 +17,10 @@ async def archive_latest_posts():
 	#and take a long time to gather/write
 	for post in posts:
 		comment_tree = su.get_post_comments(post)
-		comment_users = 
+		flat_comments = datautils.get_flattened_comments(comment_tree)
+		comment_users = [comment['account'] for comment in flat_comments]
+		dbutils.write_users(comment_users)
+		dbutils.write_comments(flat_comments)
 	return(comment_tree)
 
 @app.get('/write_users')

@@ -98,3 +98,36 @@ def get_author_info_from_user(account_info: dict[str, any]):
     
     return([account_id, account_username, account_name, account_display, account_is_verified,
            account_created_at, account_note, account_followers, account_is_bot, account_is_donor])
+
+def get_replies(comments: list):
+    if (comments == []):
+        return []
+    else:
+        replies = [comment['replies'] for comment in comments]
+        replies = [item for sublist in replies for item in sublist]
+        return [*comments, *get_replies(replies)]
+    
+def remove_duplicate_comments(flat_comments: list):
+    comment_ids = list(set([comment['id'] for comment in flat_comments]))
+    #Keeping track of which comment ids already appear in the reduced list
+    id_used = {comment_id: False for comment_id in comment_ids}
+    reduced_comments = []
+    for comment in flat_comments:
+        if (id_used[comment['id']] == False):
+            reduced_comments.append(comment)
+            id_used[comment['id']] = True
+        else:
+            pass
+    return reduced_comments
+
+def get_flattened_comments(comment_tree:list):
+    #Getting all comment replies and flattening them
+    flat_comments = get_replies(comment_tree)
+    #Extracting comments down to their base form from the API
+    flat_comments = [comment['comment'] for comment in flat_comments]
+    #Removing comments that failed to load (possibly were deleted)
+    flat_comments = [comment for comment in flat_comments if comment != 'error']
+    #Removing redundant duplicate comments
+    reduced_comments = remove_duplicate_comments(flat_comments)
+
+    return reduced_comments
