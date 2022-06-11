@@ -7,6 +7,7 @@ app = FastAPI()
 
 @app.get('/archive_latest_posts')
 async def archive_latest_posts():
+	print('starting')
 	posts = su.get_posts(1)
 	#Grabbing the first five posts just for test purposes
 	posts = posts[0:1]
@@ -15,13 +16,18 @@ async def archive_latest_posts():
 	dbutils.write_posts(posts)
 	#Collecting and writing comments for each post individually since they're quite large
 	#and take a long time to gather/write
-	#for post in posts:
-	#	comment_tree = su.get_post_comments(post)
-	#	flat_comments = datautils.get_flattened_comments(comment_tree)
-	#	comment_users = [comment['account'] for comment in flat_comments]
-	#	dbutils.write_users(comment_users)
-	#	dbutils.write_comments(flat_comments)
-	#return(comment_tree)
+	for post in posts:
+		print('getting comments')
+		comment_tree = su.get_post_comments(post)
+		print('got comments')
+		flat_comments = datautils.get_flattened_comments(comment_tree)
+		comment_users = [comment['account'] for comment in flat_comments]
+		print('writing users')
+		dbutils.write_users(comment_users)
+		print('writing comments')
+		dbutils.write_comments(flat_comments)
+		print('comments written')
+	return(comment_tree)
 
 @app.get('/write_users')
 async def write_users():

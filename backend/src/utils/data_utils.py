@@ -22,7 +22,6 @@ def unpack_comment_data(comment: dict[str, any]):
     reblogs_count = comment['reblogs_count']
     replies_count = comment['replies_count']
     favourites_count = comment['favourites_count']
-    
     return([gab_id, in_reply_to_id, content, created_at, revised_at, reblogs_count, replies_count, favourites_count])
 
 def unpack_post_data(post: dict[str, any]):

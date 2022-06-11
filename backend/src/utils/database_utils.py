@@ -23,12 +23,12 @@ def write_comments(comments: list):
     engine = create_engine(connection_url)
     with Session(engine) as session:
         for comment in comments:
-            comment_info = du.unpack_post_data(comment)
+            comment_info = du.unpack_comment_data(comment)
             user_gab_id = comment['account']['id']
             if comment_info[4] == 'null':
                 insert_comment_query = '''INSERT INTO comments(gab_id, in_reply_to_id, content, created_at, revised_at, 
                                     reblogs_count, replies_count, favourites_count, id_gab_users)
-                                    VALUES({}, {}, '{}', '{}', {}, {}, {}, {}, '{}',
+                                    VALUES({}, {}, '{}', '{}', {}, {}, {}, {},
                                     (SELECT id FROM gab_users WHERE gab_id = {}))
 
                                     ON DUPLICATE KEY UPDATE
