@@ -14,6 +14,7 @@ class Post(SQLModel, table=True):
 	reblogs_count: int
 	replies_count: int
 	id_gab_users: int
+	reactions_counts: dict
 	
 	
 class Comment(SQLModel, table=True):
@@ -28,6 +29,7 @@ class Comment(SQLModel, table=True):
 	reblogs_count: int
 	replies_count: int
 	revised_at: datetime.datetime
+	reactions_counts: dict
 	
 	
 class GabUser(SQLModel, table=True):

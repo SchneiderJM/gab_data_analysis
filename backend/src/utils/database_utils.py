@@ -5,6 +5,12 @@ from sqlalchemy.dialects.mysql import insert
 import sqlalchemy as sa
 import datetime
 
+
+#Big note for a database (there's probably a better place to put this)
+#Emojis cannot be stored by default in mysql databases and most social media uses a bunch of emojis
+#After making the table run this:
+#ALTER TABLE Tablename CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
+#It changes the character set to utf8mb4 which allows emojis, just sub Tablename for the name of your table
 def write_comments(comments: list):
     connection_url = sa.engine.URL.create(
         drivername='mysql+pymysql',
